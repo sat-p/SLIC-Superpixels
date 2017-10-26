@@ -276,6 +276,40 @@ void Slic::create_connectivity(const cv::Mat& image) {
             }
         }
     }
+    
+    /* Clear the center values. */
+        for (int j = 0; j < (int) label; j++) {
+            centers[j][0] = centers[j][1] = centers[j][2] = centers[j][3] = centers[j][4] = 0;
+            center_counts[j] = 0;
+        }
+        
+        /* Compute the new cluster centers. */
+        for (int j = 0; j < image.cols; j++) {
+            for (int k = 0; k < image.rows; k++) {
+                int c_id = new_clusters[j][k];
+                
+                if (c_id != -1) {
+                    auto colour = image.at<cv::Vec3b> (k, j);
+                    
+                    centers[c_id][0] += colour.val[0];
+                    centers[c_id][1] += colour.val[1];
+                    centers[c_id][2] += colour.val[2];
+                    centers[c_id][3] += j;
+                    centers[c_id][4] += k;
+                    
+                    center_counts[c_id] += 1;
+                }
+            }
+        }
+
+        /* Normalize the clusters. */
+        for (int j = 0; j < (int) label; j++) {
+            centers[j][0] /= center_counts[j];
+            centers[j][1] /= center_counts[j];
+            centers[j][2] /= center_counts[j];
+            centers[j][3] /= center_counts[j];
+            centers[j][4] /= center_counts[j];
+        }
 }
 
 /*
